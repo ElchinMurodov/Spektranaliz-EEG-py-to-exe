@@ -11,8 +11,10 @@ dist/
 # Inno Setup o'rnatuvchi natijasi
 installer/
 
-# Avtomatik yasaladigan rasterlar (make_assets.py qayta yasaydi)
-spektranaliz-eeg-icon.ico
-spektranaliz-eeg-icon.png
-spektranaliz-eeg-logo.png
-spektranaliz-eeg-logo-dark.png
+# Eslatma: ikona/logo rasterlari (spektranaliz-eeg-icon.ico/.png,
+# spektranaliz-eeg-logo*.png) ataylab repozitoriyga kiritilgan - shunda
+# dastur va o'rnatuvchi hech narsa yasamasdan ham tayyor rasmlardan
+# foydalanadi. make_assets.py ularni qayta yasashi mumkin.
+
+# Java yordamchi (rasterlar sandboxda Java bilan yasalган) - kompilyatsiya natijasi
+*.class
