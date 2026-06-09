@@ -32,9 +32,13 @@ ICON_PATH = resource_path("spektranaliz-eeg-icon.ico")
 # Fon yorqinligiga qarab avtomatik tanlanadi:
 #   - och fon uchun  -> spektranaliz-eeg-logo.svg (to'q matnli)
 #   - qora fon uchun -> spektranaliz-eeg-logo-dark.svg (och matnli)
+# Avval tayyor PNG (make_assets.py yasagan) ishlatiladi - SVG renderi
+# Windows'da ishonchsiz bo'lgani uchun. PNG bo'lmasa, SVG ga qaytiladi.
+LOGO_LIGHT_PNG = resource_path("spektranaliz-eeg-logo.png")
+LOGO_DARK_PNG = resource_path("spektranaliz-eeg-logo-dark.png")
 LOGO_LIGHT_PATH = resource_path("spektranaliz-eeg-logo.svg")
 LOGO_DARK_PATH = resource_path("spektranaliz-eeg-logo-dark.svg")
-LOGO_ASPECT = 1320.0 / 420.0  # logo SVG nisbati (eni / bo'yi)
+LOGO_ASPECT = 1320.0 / 420.0  # logo nisbati (eni / bo'yi)
 
 # Fon rasmi resurs sifatida dastur yoniga / .exe ichiga joylanadi.
 BACKGROUND_PATH = resource_path("EEG spectrum background 700x700.svg")
@@ -169,10 +173,10 @@ class EEGSpektralTahlilDasturi:
                 return
         except Exception:
             pass
-        # .ico ishlamasa, PNG/SVG dan PhotoImage orqali urinib ko'ramiz.
+        # .ico ishlamasa, PNG dan PhotoImage orqali urinib ko'ramiz.
         for candidate in (
-            resource_path("EEG-spectrum-background-730x730.png"),
             resource_path("spektranaliz-eeg-icon.png"),
+            resource_path("EEG-spectrum-background-730x730.png"),
         ):
             try:
                 if os.path.exists(candidate):
@@ -324,6 +328,18 @@ class EEGSpektralTahlilDasturi:
         except Exception:
             return None
 
+    def load_logo_image(self, path, width, height):
+        """Logo rasmini yuklaydi: PNG bo'lsa to'g'ridan-to'g'ri, SVG bo'lsa renderlaydi."""
+        width = max(1, int(width))
+        height = max(1, int(height))
+        ext = os.path.splitext(path)[1].lower()
+        if ext == ".png":
+            try:
+                return Image.open(path).convert("RGBA").resize((width, height), RESAMPLE)
+            except Exception:
+                return None
+        return self.render_svg_image(path, width, height)
+
     def region_is_dark(self, image, box):
         """Fon rasmining berilgan sohasi qorong'i (to'q) ekanini aniqlaydi."""
         try:
@@ -356,12 +372,20 @@ class EEGSpektralTahlilDasturi:
             int(center_x + target_w / 2), int(top_margin + target_h),
         )
         dark_bg = self.region_is_dark(background_pil, box)
-        logo_path = LOGO_DARK_PATH if dark_bg else LOGO_LIGHT_PATH
+        # Avval tayyor PNG, bo'lmasa SVG (zaxira).
+        candidates = (
+            [LOGO_DARK_PNG, LOGO_DARK_PATH] if dark_bg
+            else [LOGO_LIGHT_PNG, LOGO_LIGHT_PATH]
+        )
+        chosen = next((path for path in candidates if os.path.exists(path)), None)
+        if chosen is None:
+            self.canvas.itemconfig(self.logo_id, state="hidden")
+            return 0
 
-        cache_key = (logo_path, int(target_w), int(target_h))
+        cache_key = (chosen, int(target_w), int(target_h))
         photo = self.logo_cache.get(cache_key)
         if photo is None:
-            image = self.render_svg_image(logo_path, target_w, target_h)
+            image = self.load_logo_image(chosen, target_w, target_h)
             if image is None:
                 self.canvas.itemconfig(self.logo_id, state="hidden")
                 return 0

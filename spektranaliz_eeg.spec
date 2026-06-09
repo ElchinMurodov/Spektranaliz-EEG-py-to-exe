@@ -12,13 +12,12 @@ import os
 
 block_cipher = None
 
-# Agar .ico fayl hali yo'q bo'lsa, uni SVG ikonadan avtomatik yasaymiz.
-# Bu pyinstaller to'g'ridan-to'g'ri ishga tushirilganda ham ikona biriktirilishini ta'minlaydi.
+# Agar ikona/logo rasterlari hali yo'q bo'lsa, ularni SVG dan avtomatik yasaymiz.
 if not os.path.exists("spektranaliz-eeg-icon.ico"):
     import subprocess
     import sys as _sys
-    print("[spec] .ico topilmadi - make_ico.py ishga tushirilmoqda...")
-    subprocess.run([_sys.executable, "make_ico.py"], check=False)
+    print("[spec] Rasterlar topilmadi - make_assets.py ishga tushirilmoqda...")
+    subprocess.run([_sys.executable, "make_assets.py"], check=False)
 
 ICON_FILE = "spektranaliz-eeg-icon.ico" if os.path.exists("spektranaliz-eeg-icon.ico") else None
 
@@ -33,6 +32,8 @@ datas = [
     ("spektranaliz-eeg-icon.png", "."),
     ("spektranaliz-eeg-logo.svg", "."),
     ("spektranaliz-eeg-logo-dark.svg", "."),
+    ("spektranaliz-eeg-logo.png", "."),
+    ("spektranaliz-eeg-logo-dark.png", "."),
 ]
 
 # Faqat haqiqatan mavjud fayllarni qoldiramiz (ixtiyoriylari yo'q bo'lsa o'tkazib yuboriladi).
