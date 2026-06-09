@@ -95,4 +95,9 @@ coll = COLLECT(
     upx=True,
     upx_exclude=[],
     name="Spektranaliz EEG",
+    # Fayllarni "_internal" o'rniga to'g'ridan-to'g'ri dastur papkasi ildiziga
+    # joylaymiz. Shunda o'rnatilgandan keyin resurslar (jumladan
+    # spektranaliz-eeg-icon.ico) C:\Program Files\Spektranaliz EEG\ da bo'ladi
+    # va yorliq ikonasi yo'li to'g'ri ishlaydi.
+    contents_directory=".",
 )

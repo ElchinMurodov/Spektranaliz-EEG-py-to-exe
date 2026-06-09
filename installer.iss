@@ -45,14 +45,18 @@ Name: "desktopicon"; Description: "Ish stolida yorliq yaratish"; GroupDescriptio
 [Files]
 ; Yig'ilgan dasturning barcha fayllari (.exe, kutubxonalar, resurslar).
 Source: "{#MyBuildDir}\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs ignoreversion
+; Ikonani dastur papkasi ildiziga kafolatlangan nusxalaymiz - yorliqlar va
+; .exe yuzidagi ikona yo'li doimo to'g'ri bo'lishi uchun (PyInstaller fayllarni
+; "_internal" ga joylasa ham, bu nusxa {app} ildizida turadi).
+Source: "spektranaliz-eeg-icon.ico"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
-; Start Menu yorlig'i
-Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\spektranaliz-eeg-icon.ico"
+; Start Menu yorlig'i (ikona {app} ildizidagi .ico dan)
+Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\spektranaliz-eeg-icon.ico"; WorkingDir: "{app}"
 ; Dasturni o'chirish yorlig'i
 Name: "{group}\{#MyAppName} dasturini o'chirish"; Filename: "{uninstallexe}"
 ; Ish stoli yorlig'i (foydalanuvchi tanlasa)
-Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\spektranaliz-eeg-icon.ico"; Tasks: desktopicon
+Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\spektranaliz-eeg-icon.ico"; WorkingDir: "{app}"; Tasks: desktopicon
 
 [Run]
 ; O'rnatish tugagach dasturni ishga tushirish imkoni
