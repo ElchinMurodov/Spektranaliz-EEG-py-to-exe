@@ -12,6 +12,16 @@ import os
 
 block_cipher = None
 
+# Agar .ico fayl hali yo'q bo'lsa, uni SVG ikonadan avtomatik yasaymiz.
+# Bu pyinstaller to'g'ridan-to'g'ri ishga tushirilganda ham ikona biriktirilishini ta'minlaydi.
+if not os.path.exists("spektranaliz-eeg-icon.ico"):
+    import subprocess
+    import sys as _sys
+    print("[spec] .ico topilmadi - make_ico.py ishga tushirilmoqda...")
+    subprocess.run([_sys.executable, "make_ico.py"], check=False)
+
+ICON_FILE = "spektranaliz-eeg-icon.ico" if os.path.exists("spektranaliz-eeg-icon.ico") else None
+
 # Dastur yoniga qo'shiladigan resurs fayllar: (manba, .exe ichidagi joy).
 # '.' - resurslar bundle ildiziga (resource_path() shu yerdan o'qiydi) joylanadi.
 datas = [
@@ -72,7 +82,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon="spektranaliz-eeg-icon.ico",
+    icon=ICON_FILE,
 )
 
 coll = COLLECT(

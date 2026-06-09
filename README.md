@@ -87,11 +87,21 @@ ro'yxatiga qo'shadi.
 | `spektranaliz_eeg.spec` | PyInstaller sozlamasi (resurslarni `.exe` ga bundle qiladi) |
 | `installer.iss` | Inno Setup o'rnatuvchi skripti |
 | `build.bat` | Hammasini avtomatik bajaruvchi skript |
-| `spektranaliz-eeg-icon.svg` | Dastur ikonkasi (manba) |
+| `spektranaliz-eeg-icon.svg` | Dastur ikonkasi manbasi (.ico shu fayldan yasaladi) |
 | `EEG spectrum background 700x700.svg` | Fon rasmi (asosiy) |
 | `EEG-spectrum-background-730x730.png` | Fon rasmi (zaxira) |
 | `EEG spectrum background 685x685.jpg` | Fon rasmi (zaxira) |
-| `spektranaliz-eeg-logo*.svg` | Logotiplar |
+| `spektranaliz-eeg-logo.svg` | Logotip (och fon uchun) — sarlavha tepasida ko'rsatiladi |
+| `spektranaliz-eeg-logo-dark.svg` | Logotip (qora fon uchun) — sarlavha tepasida ko'rsatiladi |
+
+> **Logotip va ikona haqida:**
+> - Dastur oynasi ochilganda yuqorida (dissertatsiya nomi tepasida) logotip
+>   ko'rsatiladi. Fon yorqinligiga qarab och yoki qora variant **avtomatik**
+>   tanlanadi (`spektranaliz-eeg-logo.svg` / `spektranaliz-eeg-logo-dark.svg`).
+> - Dastur oynasi, vazifalar paneli, `.exe` fayli, Start Menu va Ish stoli
+>   yorliqlari uchun ikona `spektranaliz-eeg-icon.svg` dan yasalgan
+>   `spektranaliz-eeg-icon.ico` fayli ishlatiladi (build paytida `make_ico.py`
+>   avtomatik yaratadi).
 
 ---
 
