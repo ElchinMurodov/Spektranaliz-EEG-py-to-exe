@@ -1,0 +1,16 @@
+# Python virtual muhit
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# PyInstaller yig'ish natijalari
+build/
+dist/
+
+# Inno Setup o'rnatuvchi natijasi
+installer/
+
+# Avtomatik yasaladigan ikona (make_ico.py qayta yasaydi)
+spektranaliz-eeg-icon.ico
+spektranaliz-eeg-icon.png

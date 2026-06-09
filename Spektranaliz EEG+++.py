@@ -1,6 +1,7 @@
 import io
 import os
 import re
+import sys
 import tkinter as tk
 from tkinter import filedialog, font as tkfont, messagebox
 from PIL import Image, ImageDraw, ImageTk
@@ -10,11 +11,28 @@ from scipy.integrate import trapezoid
 from scipy import signal as sp_signal
 
 
-BACKGROUND_PATH = r"D:/2-kurs Magistr 2025-2026-o'quv yillar/EEG dissertatsiya/EEG dastur software/Spektranaliz EEG+++/EEG spectrum background 700x700.svg"
+def resource_path(relative_path):
+    """Resurs faylning to'liq yo'lini qaytaradi.
+
+    Bu funksiya dastur oddiy .py ko'rinishida ishga tushirilganda ham,
+    PyInstaller yordamida .exe ga yig'ilganda ham to'g'ri ishlaydi.
+    PyInstaller .exe ichidagi resurslarni vaqtinchalik papkaga (sys._MEIPASS)
+    chiqaradi, shuning uchun avval o'sha papka tekshiriladi.
+    """
+    base_path = getattr(sys, "_MEIPASS", None)
+    if base_path is None:
+        base_path = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(base_path, relative_path)
+
+
+APP_NAME = "Spektranaliz EEG"
+ICON_PATH = resource_path("spektranaliz-eeg-icon.ico")
+
+# Fon rasmi resurs sifatida dastur yoniga / .exe ichiga joylanadi.
+BACKGROUND_PATH = resource_path("EEG spectrum background 700x700.svg")
 BACKGROUND_FALLBACK_PATHS = [
-    r"D:/2-kurs Magistr 2025-2026-o'quv yillar/EEG dissertatsiya/EEG dastur software/Spektranaliz EEG+++/EEG spectrum background 700x700.png",
-    r"D:/2-kurs Magistr 2025-2026-o'quv yillar/EEG dissertatsiya/EEG dastur software/Spektranaliz EEG+++/EEG spectrum background 700x700.jpg",
-    r"D:/2-kurs Magistr 2025-2026-o'quv yillar/EEG dissertatsiya/EEG dastur software/Spektranaliz EEG+++/EEG spectrum background 685x685.jpg",
+    resource_path("EEG-spectrum-background-730x730.png"),
+    resource_path("EEG spectrum background 685x685.jpg"),
 ]
 WINDOW_W, WINDOW_H = 700, 700
 LAYOUT_W, LAYOUT_H = 700, 700
@@ -50,6 +68,7 @@ class EEGSpektralTahlilDasturi:
         self.root.geometry(f"{WINDOW_W}x{WINDOW_H}")
         self.root.minsize(600, 600)
         self.root.resizable(True, True)
+        self.set_window_icon()
 
         self.selected_file = None
         self.resize_job = None
@@ -127,6 +146,27 @@ class EEGSpektralTahlilDasturi:
 
         self.root.bind("<Configure>", self.on_resize)
         self.root.after(100, self.redraw)
+
+    def set_window_icon(self):
+        """Dastur oynasi va vazifalar panelidagi ikonkani o'rnatadi."""
+        try:
+            if os.path.exists(ICON_PATH):
+                self.root.iconbitmap(default=ICON_PATH)
+                return
+        except Exception:
+            pass
+        # .ico ishlamasa, PNG/SVG dan PhotoImage orqali urinib ko'ramiz.
+        for candidate in (
+            resource_path("EEG-spectrum-background-730x730.png"),
+            resource_path("spektranaliz-eeg-icon.png"),
+        ):
+            try:
+                if os.path.exists(candidate):
+                    self._icon_photo = ImageTk.PhotoImage(Image.open(candidate))
+                    self.root.iconphoto(True, self._icon_photo)
+                    return
+            except Exception:
+                continue
 
     def rr_points(self, x1, y1, x2, y2, r):
         r = min(r, (x2 - x1) / 2, (y2 - y1) / 2)

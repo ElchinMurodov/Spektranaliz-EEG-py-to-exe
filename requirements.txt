@@ -1,0 +1,21 @@
+# Spektranaliz EEG - dastur ishlashi uchun zarur kutubxonalar
+# O'rnatish: pip install -r requirements.txt
+
+# --- Asosiy ishlash bog'liqliklari ---
+numpy
+scipy
+pandas
+pillow
+
+# --- EDF/EDF+/BDF/BDF+ fayllarni o'qish uchun ---
+# pyedflib yengil va yetarli (mne ham ishlaydi, lekin ancha katta hajmli).
+pyedflib
+
+# --- SVG fon va SVG ikonkani rasterlash uchun (.ico yasashda ham ishlatiladi) ---
+# svglib + reportlab pure-python yechim bo'lib, Windows'da qo'shimcha
+# tashqi DLL talab qilmaydi (cairosvg dan ko'ra ishonchliroq).
+svglib
+reportlab
+
+# --- .exe yasash uchun ---
+pyinstaller
