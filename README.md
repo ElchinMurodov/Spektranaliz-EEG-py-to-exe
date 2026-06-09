@@ -30,7 +30,7 @@ ishga tushiring). U avtomatik ravishda quyidagilarni bajaradi:
 
 1. Virtual muhit (`.venv`) yaratadi
 2. Kerakli kutubxonalarni o'rnatadi (`requirements.txt`)
-3. SVG ikonadan `.ico` fayl yasaydi (`make_ico.py`)
+3. SVG ikona va logolardan raster fayllar yasaydi (`make_assets.py`)
 4. PyInstaller orqali `.exe` yig'adi (`spektranaliz_eeg.spec`)
 5. Inno Setup o'rnatilgan bo'lsa, `setup.exe` ni ham yasaydi
 
@@ -50,8 +50,8 @@ python -m venv .venv
 :: 2) Kutubxonalar
 pip install -r requirements.txt
 
-:: 3) Ikonka (.ico) yasash
-python make_ico.py
+:: 3) Ikonka va logo rasterlarini yasash
+python make_assets.py
 
 :: 4) .exe yig'ish
 pyinstaller --noconfirm --clean spektranaliz_eeg.spec
@@ -83,7 +83,7 @@ ro'yxatiga qo'shadi.
 |------|----------|
 | `Spektranaliz EEG+++.py` | Asosiy dastur (resurs yo'llari `resource_path()` orqali) |
 | `requirements.txt` | Zarur Python kutubxonalari |
-| `make_ico.py` | SVG ikonadan ko'p o'lchamli `.ico` yasaydi |
+| `make_assets.py` | SVG ikona/logolardan `.ico` va `.png` rasterlar yasaydi (Pillow zaxirasi bilan) |
 | `spektranaliz_eeg.spec` | PyInstaller sozlamasi (resurslarni `.exe` ga bundle qiladi) |
 | `installer.iss` | Inno Setup o'rnatuvchi skripti |
 | `build.bat` | Hammasini avtomatik bajaruvchi skript |
@@ -100,8 +100,9 @@ ro'yxatiga qo'shadi.
 >   tanlanadi (`spektranaliz-eeg-logo.svg` / `spektranaliz-eeg-logo-dark.svg`).
 > - Dastur oynasi, vazifalar paneli, `.exe` fayli, Start Menu va Ish stoli
 >   yorliqlari uchun ikona `spektranaliz-eeg-icon.svg` dan yasalgan
->   `spektranaliz-eeg-icon.ico` fayli ishlatiladi (build paytida `make_ico.py`
->   avtomatik yaratadi).
+>   `spektranaliz-eeg-icon.ico` fayli ishlatiladi (build paytida `make_assets.py`
+>   avtomatik yaratadi; SVG renderi ishlamasa Pillow bilan aynan shu dizaynni
+>   chizadi, shuning uchun ikona/logo hech qachon bo'sh qolmaydi).
 
 ---
 

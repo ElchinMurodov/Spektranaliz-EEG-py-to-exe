@@ -11,6 +11,8 @@ dist/
 # Inno Setup o'rnatuvchi natijasi
 installer/
 
-# Avtomatik yasaladigan ikona (make_ico.py qayta yasaydi)
+# Avtomatik yasaladigan rasterlar (make_assets.py qayta yasaydi)
 spektranaliz-eeg-icon.ico
 spektranaliz-eeg-icon.png
+spektranaliz-eeg-logo.png
+spektranaliz-eeg-logo-dark.png

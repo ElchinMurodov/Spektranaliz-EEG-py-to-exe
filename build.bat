@@ -6,7 +6,7 @@ REM
 REM  Bu skript:
 REM    1) Python virtual muhitini (venv) yaratadi
 REM    2) Kerakli kutubxonalarni o'rnatadi (requirements.txt)
-REM    3) SVG ikonadan .ico fayl yasaydi (make_ico.py)
+REM    3) SVG ikona/logolardan raster (.ico/.png) yasaydi (make_assets.py)
 REM    4) PyInstaller orqali .exe yig'adi (spektranaliz_eeg.spec)
 REM    5) Inno Setup bo'lsa, o'rnatuvchi (setup.exe) ni ham yasaydi
 REM
@@ -49,11 +49,11 @@ if errorlevel 1 (
     exit /b 1
 )
 
-REM --- 4. .ico ikonka yasash ---
-echo [3/5] Ikonka (.ico) yasalmoqda...
-python make_ico.py
+REM --- 4. Ikonka va logo rasterlarini yasash ---
+echo [3/5] Ikonka (.ico) va logo (.png) rasterlari yasalmoqda...
+python make_assets.py
 if errorlevel 1 (
-    echo [OGOHLANTIRISH] Ikona yasalmadi, lekin yig'ish davom etadi.
+    echo [OGOHLANTIRISH] Rasterlar yasalmadi, lekin yig'ish davom etadi.
 )
 
 REM --- 5. .exe yig'ish ---
