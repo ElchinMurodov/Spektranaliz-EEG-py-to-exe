@@ -28,6 +28,14 @@ def resource_path(relative_path):
 APP_NAME = "Spektranaliz EEG"
 ICON_PATH = resource_path("spektranaliz-eeg-icon.ico")
 
+# Dastur logotiplari (sarlavha tepasida ko'rsatiladi).
+# Fon yorqinligiga qarab avtomatik tanlanadi:
+#   - och fon uchun  -> spektranaliz-eeg-logo.svg (to'q matnli)
+#   - qora fon uchun -> spektranaliz-eeg-logo-dark.svg (och matnli)
+LOGO_LIGHT_PATH = resource_path("spektranaliz-eeg-logo.svg")
+LOGO_DARK_PATH = resource_path("spektranaliz-eeg-logo-dark.svg")
+LOGO_ASPECT = 1320.0 / 420.0  # logo SVG nisbati (eni / bo'yi)
+
 # Fon rasmi resurs sifatida dastur yoniga / .exe ichiga joylanadi.
 BACKGROUND_PATH = resource_path("EEG spectrum background 700x700.svg")
 BACKGROUND_FALLBACK_PATHS = [
@@ -84,6 +92,12 @@ class EEGSpektralTahlilDasturi:
         self.canvas.pack(fill="both", expand=True)
 
         self.bg_id = self.canvas.create_image(0, 0, anchor="nw")
+
+        # Dastur logotipi (sarlavha tepasidagi banner). Fon yorqinligiga
+        # qarab och yoki qora variant tanlanadi.
+        self.logo_photo = None
+        self.logo_cache = {}
+        self.logo_id = self.canvas.create_image(0, 0, anchor="center")
 
         self.title_id = self.canvas.create_text(
             0, 0,
@@ -265,6 +279,101 @@ class EEGSpektralTahlilDasturi:
         top = max(0, (image.height - height) // 2)
         return image.crop((left, top, left + width, top + height))
 
+    def render_svg_image(self, path, target_w, target_h):
+        """SVG faylni shaffof fonli RGBA PIL Image ko'rinishiga aylantiradi.
+
+        Rasterlovchilar tartibi (birinchi ishlagani qo'llaniladi):
+          1) cairosvg  - to'liq shaffoflik bilan
+          2) svglib + reportlab - magenta (#FF00FF) rang-kaliti orqali shaffoflik
+        Hech biri ishlamasa None qaytaradi.
+        """
+        target_w = max(1, int(target_w))
+        target_h = max(1, int(target_h))
+        if not os.path.exists(path):
+            return None
+
+        # 1) cairosvg - shaffof fon (eng yaxshi natija)
+        try:
+            import cairosvg
+            png_bytes = cairosvg.svg2png(url=path, output_width=target_w, output_height=target_h)
+            return Image.open(io.BytesIO(png_bytes)).convert("RGBA")
+        except Exception:
+            pass
+
+        # 2) svglib + reportlab - magenta fonda rasterlab, keyin shaffof qilamiz
+        try:
+            from svglib.svglib import svg2rlg
+            from reportlab.graphics import renderPM
+
+            drawing = svg2rlg(path)
+            if drawing is None or not drawing.width or not drawing.height:
+                return None
+            scale = min(target_w / drawing.width, target_h / drawing.height)
+            drawing.scale(scale, scale)
+            drawing.width *= scale
+            drawing.height *= scale
+            png_bytes = renderPM.drawToString(drawing, fmt="PNG", bg=0xFF00FF)
+            image = Image.open(io.BytesIO(png_bytes)).convert("RGBA")
+            pixels = image.getdata()
+            cleaned = [
+                (r, g, b, 0) if (r > 230 and g < 40 and b > 230) else (r, g, b, a)
+                for (r, g, b, a) in pixels
+            ]
+            image.putdata(cleaned)
+            return image
+        except Exception:
+            return None
+
+    def region_is_dark(self, image, box):
+        """Fon rasmining berilgan sohasi qorong'i (to'q) ekanini aniqlaydi."""
+        try:
+            left, top, right, bottom = box
+            left = max(0, min(left, image.width - 1))
+            top = max(0, min(top, image.height - 1))
+            right = max(left + 1, min(right, image.width))
+            bottom = max(top + 1, min(bottom, image.height))
+            region = image.crop((left, top, right, bottom)).convert("L")
+            stat = region.resize((16, 16), RESAMPLE)
+            pixels = list(stat.getdata())
+            mean = sum(pixels) / len(pixels)
+            return mean < 130
+        except Exception:
+            return False
+
+    def place_logo(self, w, h, background_pil):
+        """Sarlavha tepasida mos logotipni (och/qora) joylashtiradi."""
+        target_h = min(h * 0.095, (w * 0.46) / LOGO_ASPECT)
+        target_h = max(40, target_h)
+        target_w = target_h * LOGO_ASPECT
+
+        top_margin = max(6, int(h * 0.012))
+        center_x = w / 2
+        center_y = top_margin + target_h / 2
+
+        # Logo sohasidagi fon yorqinligiga qarab variant tanlanadi.
+        box = (
+            int(center_x - target_w / 2), int(top_margin),
+            int(center_x + target_w / 2), int(top_margin + target_h),
+        )
+        dark_bg = self.region_is_dark(background_pil, box)
+        logo_path = LOGO_DARK_PATH if dark_bg else LOGO_LIGHT_PATH
+
+        cache_key = (logo_path, int(target_w), int(target_h))
+        photo = self.logo_cache.get(cache_key)
+        if photo is None:
+            image = self.render_svg_image(logo_path, target_w, target_h)
+            if image is None:
+                self.canvas.itemconfig(self.logo_id, state="hidden")
+                return 0
+            photo = ImageTk.PhotoImage(image)
+            self.logo_cache[cache_key] = photo
+
+        self.logo_photo = photo
+        self.canvas.itemconfig(self.logo_id, image=photo, state="normal")
+        self.canvas.coords(self.logo_id, center_x, center_y)
+        self.canvas.tag_raise(self.logo_id, self.bg_id)
+        return top_margin + target_h  # logodan keyingi pastki y koordinatasi
+
     def make_folder_icon(self, size):
         size = max(18, int(size))
         stroke = max(2, size // 12)
@@ -369,8 +478,15 @@ class EEGSpektralTahlilDasturi:
         self.canvas.itemconfig(self.bg_id, image=self.bg_photo)
         self.canvas.tag_lower(self.bg_id)
 
-        self.canvas.itemconfig(self.title_id, font=("Times New Roman", font(24), "bold italic"), width=int(w * 0.96))
-        self.canvas.coords(self.title_id, x(342), y(63))
+        # Logotipni sarlavha tepasiga joylashtiramiz (fon yorqinligiga mos variant).
+        logo_bottom = self.place_logo(w, h, bg)
+
+        # Sarlavhani logo bilan fayl paneli orasiga markazlaymiz.
+        panel_top = y(153)
+        title_y = (logo_bottom + panel_top) / 2 if logo_bottom else y(63)
+        self.canvas.itemconfig(self.title_id, font=("Times New Roman", font(16), "bold italic"), width=int(w * 0.95))
+        self.canvas.coords(self.title_id, x(342), title_y)
+        self.canvas.tag_raise(self.title_id)
 
         self.canvas.itemconfig(self.upload_label_id, font=("Times New Roman", font(18), "bold"), width=int(w * 0.40))
         self.canvas.coords(self.upload_label_id, x(183), y(186))
