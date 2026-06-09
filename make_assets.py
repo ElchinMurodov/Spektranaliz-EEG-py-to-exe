@@ -246,18 +246,35 @@ def draw_logo(dark=False):
 
 
 # ----------------------------------------------------------------------------
-def build_icon():
+def save_ico(image):
+    """Ikona .ico ni KLASSIK BMP formatida saqlaydi (PyInstaller/Explorer uchun
+    eng ishonchli). bitmap_format Pillow'ning eski versiyasida bo'lmasligi
+    mumkin, shunday holda oddiy usulga qaytamiz."""
+    sizes = [(s, s) for s in ICON_SIZES]
+    try:
+        image.save(OUT_ICO, format="ICO", bitmap_format="bmp", sizes=sizes)
+    except TypeError:
+        image.save(OUT_ICO, format="ICO", sizes=sizes)
+
+
+def build_icon(force):
+    if os.path.exists(OUT_ICO) and os.path.exists(OUT_ICON_PNG) and not force:
+        print(f"[SKIP] {os.path.basename(OUT_ICO)} mavjud (saqlandi). Qayta yasash: --force")
+        return
     image = svg_to_image(ICON_SVG, 256, 256)
     source = "SVG"
     if image is None:
         image = draw_icon(256)
         source = "Pillow"
-    image.save(OUT_ICO, format="ICO", sizes=[(s, s) for s in ICON_SIZES])
+    save_ico(image)
     image.save(OUT_ICON_PNG, format="PNG")
     print(f"[OK] Ikona ({source}): {os.path.basename(OUT_ICO)} + .png")
 
 
-def build_logo(svg_path, out_path, dark):
+def build_logo(svg_path, out_path, dark, force):
+    if os.path.exists(out_path) and not force:
+        print(f"[SKIP] {os.path.basename(out_path)} mavjud (saqlandi). Qayta yasash: --force")
+        return
     image = svg_to_image(svg_path, 1320, 420)
     source = "SVG"
     if image is None:
@@ -273,10 +290,11 @@ def main():
     except ImportError:
         raise SystemExit("[XATO] Pillow o'rnatilmagan. Bajaring: pip install pillow")
 
-    build_icon()
-    build_logo(LOGO_LIGHT_SVG, OUT_LOGO_LIGHT, dark=False)
-    build_logo(LOGO_DARK_SVG, OUT_LOGO_DARK, dark=True)
-    print("[TAYYOR] Barcha raster fayllar yaratildi.")
+    force = "--force" in sys.argv[1:]
+    build_icon(force)
+    build_logo(LOGO_LIGHT_SVG, OUT_LOGO_LIGHT, False, force)
+    build_logo(LOGO_DARK_SVG, OUT_LOGO_DARK, True, force)
+    print("[TAYYOR] Raster fayllar tayyor.")
 
 
 if __name__ == "__main__":

@@ -120,6 +120,15 @@ uchun `mne` ishlatilmaydi (uning o'rniga yengilroq `pyedflib`).
 **EDF/BDF fayllar ochilmayapti?**
 `pyedflib` o'rnatilganiga ishonch hosil qiling (`requirements.txt` da bor).
 
+**Yorliq (shortcut) ikonkasi ko'rinmayapti / "fayl topilmadi" xatosi?**
+PyInstaller 6.x odatda fayllarni `_internal` papkasiga joylaydi. Bu loyihada
+`spektranaliz_eeg.spec` da `contents_directory="."` o'rnatilgan — shu sababli
+barcha fayllar to'g'ridan-to'g'ri `C:\Program Files\Spektranaliz EEG\` ichida
+bo'ladi va `spektranaliz-eeg-icon.ico` aynan shu yerda turadi. Qo'shimcha
+kafolat sifatida `installer.iss` ikonani `{app}` ildiziga alohida nusxalaydi.
+Agar eski o'rnatishdan keyin ham ko'rinmasa, bu **Windows ikona keshi** —
+kompyuterni qayta yuklang yoki ikona keshini tozalang (`ie4uinit.exe -show`).
+
 ---
 
 ## 6. Qo'llab-quvvatlanadigan fayl formatlari
